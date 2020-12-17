@@ -14,6 +14,8 @@ https://iotdesignpro.com/projects/iot-controlled-led-using-firebase-database-and
 
 #include <string>
 
+#include "credentials.h"
+
 #include <WiFi.h>
 #include "soc/soc.h"
 #include "soc/rtc_cntl_reg.h"
@@ -21,12 +23,12 @@ https://iotdesignpro.com/projects/iot-controlled-led-using-firebase-database-and
 
 #include "esp_camera.h"
 
-const char* ssid = "ZONGZ";
-const char* password = "zz12343705";
+// const char* ssid = "";
+// const char* password = "";
 
 //https://console.firebase.google.com/project/xxxxxxxxxx/settings/serviceaccounts/databasesecrets
-String FIREBASE_HOST = "esp8266-f2775.firebaseio.com";
-String FIREBASE_AUTH = "EQ0xXkArCNnNnDlrd7kxaroYoTULU1lZgDPLtD9L";
+// String FIREBASE_HOST = "";
+// String FIREBASE_AUTH = "";
 
 #include "FirebaseESP32.h"
 FirebaseData firebaseData;
@@ -141,10 +143,10 @@ void setup() {
   Serial.begin(115200);
   Serial.setDebugOutput(true);
   Serial.println();
-  Serial.println("ssid: " + (String)ssid);
-  Serial.println("password: " + (String)password);
+  Serial.println("ssid: " + (String)WIFI_SSID);
+  Serial.println("password: " + (String)WIFI_PASS);
   
-  WiFi.begin(ssid, password);
+  WiFi.begin(WIFI_SSID, WIFI_PASS);
 
   long int StartTime=millis();
   while (WiFi.status() != WL_CONNECTED) {
@@ -153,13 +155,11 @@ void setup() {
   } 
 
   if (WiFi.status() == WL_CONNECTED) {
-    char* apssid = "ESP32-CAM";
-    char* appassword = "12345678";         //AP password require at least 8 characters.
     Serial.println(""); 
     Serial.print("Camera Ready! Use 'http://");
     Serial.print(WiFi.localIP());
     Serial.println("' to connect");
-    WiFi.softAP((WiFi.localIP().toString()+"_"+(String)apssid).c_str(), appassword);            
+    WiFi.softAP((WiFi.localIP().toString()+"_"+(String)AP_SSID).c_str(), AP_PASS);            
   }
   else {
     Serial.println("Connection failed");
