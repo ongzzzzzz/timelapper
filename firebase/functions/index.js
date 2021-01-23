@@ -17,3 +17,7 @@ const functions = require('firebase-functions');
 
     CAREFUL DONT TOO EXPENSIVE
 */
+
+exports.dailyExportTimelapse = functions.pubsub.schedule().timeZone('Asia/Kuala_Lumpur').onRun(() => {
+    
+})
