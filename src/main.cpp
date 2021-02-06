@@ -21,7 +21,7 @@ https://iotdesignpro.com/projects/iot-controlled-led-using-firebase-database-and
 #include "soc/soc.h"
 #include "soc/rtc_cntl_reg.h"
 #include "Base64.h"
-#include <base64.h>
+// #include <base64.h>
 #include "esp_camera.h"
 
 // const char* ssid = "";
@@ -37,7 +37,7 @@ FirebaseData firebaseData;
 #include <FirebaseJson.h>
 FirebaseJson json;
 
-DynamicJsonDocument doc(4096);
+// DynamicJsonDocument doc(4096);
 
 
 // WARNING!!! Make sure that you have either selected ESP32 Wrover Module,
@@ -64,7 +64,8 @@ DynamicJsonDocument doc(4096);
 
 const char* firestoreURL = "https://firestore.googleapis.com/v1/projects/esp8266-f2775/databases/(default)/documents/timelapper/";
 const char* epochTime = "160121";
-char fullURL[128];
+// char fullURL[128];
+// char payload[65600] = "";
 
 long prev_millis = 0;
 int capture_interval = 30000;
@@ -77,6 +78,8 @@ String httpGETRequest(char* url);
 int httpPOSTRequest(char* json, char* url);
 int httpPATCHRequest(String json, char* url);
 void packageJson(DynamicJsonDocument doc, const String& base64image);
+
+
 
 void configInitCamera(){
 	config.ledc_channel = LEDC_CHANNEL_0;
@@ -117,35 +120,41 @@ void configInitCamera(){
 	esp_err_t err = esp_camera_init(&config);
 	if (err != ESP_OK) {
 		Serial.printf("Camera init failed with error 0x%x", err);
-		delay(1000);
+		digitalWrite(4, HIGH);
+		delay(450);
+		digitalWrite(4, LOW);
+		delay(100);
+		digitalWrite(4, HIGH);
+		delay(450);
+		digitalWrite(4, LOW);
 		ESP.restart();
 	}
 
 	sensor_t * s = esp_camera_sensor_get();
-	// s->set_brightness(s, 0);     // -2 to 2
-	// s->set_contrast(s, 0);       // -2 to 2
-	// s->set_saturation(s, 0);     // -2 to 2
-	// s->set_special_effect(s, 0); // 0 to 6 (0 - No Effect, 1 - Negative, 2 - Grayscale, 3 - Red Tint, 4 - Green Tint, 5 - Blue Tint, 6 - Sepia)
-	// s->set_whitebal(s, 1);       // 0 = disable , 1 = enable
-	// s->set_awb_gain(s, 1);       // 0 = disable , 1 = enable
-	// s->set_wb_mode(s, 0);        // 0 to 4 - if awb_gain enabled (0 - Auto, 1 - Sunny, 2 - Cloudy, 3 - Office, 4 - Home)
-	// s->set_exposure_ctrl(s, 1);  // 0 = disable , 1 = enable
-	// s->set_aec2(s, 0);           // 0 = disable , 1 = enable
-	// s->set_ae_level(s, 0);       // -2 to 2
-	// s->set_aec_value(s, 300);    // 0 to 1200
-	// s->set_gain_ctrl(s, 1);      // 0 = disable , 1 = enable
-	// s->set_agc_gain(s, 0);       // 0 to 30
-	// s->set_gainceiling(s, (gainceiling_t)0);  // 0 to 6
-	// s->set_bpc(s, 0);            // 0 = disable , 1 = enable
-	// s->set_wpc(s, 1);            // 0 = disable , 1 = enable
-	// s->set_raw_gma(s, 1);        // 0 = disable , 1 = enable
-	// s->set_lenc(s, 1);           // 0 = disable , 1 = enable
-	// s->set_hmirror(s, 0);        // 0 = disable , 1 = enable
-	// s->set_vflip(s, 0);          // 0 = disable , 1 = enable
-	// s->set_dcw(s, 1);            // 0 = disable , 1 = enable
-	// s->set_colorbar(s, 0);       // 0 = disable , 1 = enable
+	s->set_brightness(s, 0);     // -2 to 2
+	s->set_contrast(s, 0);       // -2 to 2
+	s->set_saturation(s, 0);     // -2 to 2
+	s->set_special_effect(s, 0); // 0 to 6 (0 - No Effect, 1 - Negative, 2 - Grayscale, 3 - Red Tint, 4 - Green Tint, 5 - Blue Tint, 6 - Sepia)
+	s->set_whitebal(s, 1);       // 0 = disable , 1 = enable
+	s->set_awb_gain(s, 1);       // 0 = disable , 1 = enable
+	s->set_wb_mode(s, 0);        // 0 to 4 - if awb_gain enabled (0 - Auto, 1 - Sunny, 2 - Cloudy, 3 - Office, 4 - Home)
+	s->set_exposure_ctrl(s, 1);  // 0 = disable , 1 = enable
+	s->set_aec2(s, 0);           // 0 = disable , 1 = enable
+	s->set_ae_level(s, 0);       // -2 to 2
+	s->set_aec_value(s, 300);    // 0 to 1200
+	s->set_gain_ctrl(s, 1);      // 0 = disable , 1 = enable
+	s->set_agc_gain(s, 0);       // 0 to 30
+	s->set_gainceiling(s, (gainceiling_t)0);  // 0 to 6
+	s->set_bpc(s, 0);            // 0 = disable , 1 = enable
+	s->set_wpc(s, 1);            // 0 = disable , 1 = enable
+	s->set_raw_gma(s, 1);        // 0 = disable , 1 = enable
+	s->set_lenc(s, 1);           // 0 = disable , 1 = enable
+	s->set_hmirror(s, 0);        // 0 = disable , 1 = enable
+	s->set_vflip(s, 0);          // 0 = disable , 1 = enable
+	s->set_dcw(s, 1);            // 0 = disable , 1 = enable
+	s->set_colorbar(s, 0);       // 0 = disable , 1 = enable
 
-	// s->set_framesize(s, FRAMESIZE_QQVGA); // VGA|CIF|QVGA|HQVGA|QQVGA   ( UXGA? SXGA? XGA? SVGA? )
+	s->set_framesize(s, FRAMESIZE_CIF); // VGA|CIF|QVGA|HQVGA|QQVGA   ( UXGA? SXGA? XGA? SVGA? )
 }
 
 
@@ -177,8 +186,14 @@ void setup() {
 		WiFi.softAP((WiFi.localIP().toString()+"_"+(String)AP_SSID).c_str(), AP_PASS);            
 	}
 	else {
-		Serial.println("connection failed, restarting uwu");
-
+		Serial.println("--------------------  connection failed, restarting uwu -------------------- ");
+		digitalWrite(4, HIGH);
+		delay(450);
+		digitalWrite(4, LOW);
+		delay(100);
+		digitalWrite(4, HIGH);
+		delay(450);
+		digitalWrite(4, LOW);
 		ESP.restart();
 		// return;
 	} 
@@ -192,62 +207,58 @@ void setup() {
 	Firebase.setMaxErrorQueue(firebaseData, 30); 
 	Firebase.enableClassicRequest(firebaseData, true);
   
-	strcpy(fullURL, firestoreURL);
-	strcat(fullURL, epochTime);
+	// strcpy(fullURL, firestoreURL);
+	// strcat(fullURL, epochTime);
 } 
  
 void loop() {
 
-	// put your main code here, to run repeatedly:
 	if ((millis() - prev_millis) > capture_interval) {
     	//Check WiFi connection status
 		prev_millis = millis();
 		if (WiFi.status() == WL_CONNECTED) {
-			// Serial.println(httpGETRequest(serverName));
+			json.add("photo", Photo2Base64());
+			String photoPath = "/esp32-cam";
+			if (Firebase.pushJSON(firebaseData, photoPath, json, 1.0)) {
+				Serial.println(firebaseData.dataPath());
+				Serial.println(firebaseData.pushName());
+				Serial.println(firebaseData.dataPath() + "/"+ firebaseData.pushName());
+			} else {
+				Serial.println(firebaseData.errorReason());
+			}
+			// clear or else will crash
+			json.clear();
 			// https://arduinojson.org/v6/how-to/use-arduinojson-with-httpclient/
 			// https://www.arduino.cc/reference/en/language/variables/data-types/string/functions/reserve/
 			// // doc["1610770215830"] = 'world';
 			// // doc["name"] = "projects/esp8266-f2775/databases/(default)/documents/timelapper/";
 
-			packageJson(doc, Photo2Base64());
-
+			// strcpy(payload, "{\"fields\": { \"1610770215830\": {\"stringValue\": ");
+			// // strcat(payload, Photo2Base64().c_str());
+			// strcat(payload, "hi");
+			// strcat(payload, "}}}");
+			// String stringyPayload(payload);
+			// Serial.println(stringyPayload);
+			// httpPATCHRequest(stringyPayload, fullURL);
+			// memset(payload, 0, sizeof payload);
+			// Serial.print("cleared payload: "); Serial.println(payload);
+			
+			// packageJson(payload, Photo2Base64()); 
 			// String jsonstring;
 			// serializeJson(doc, jsonstring);
 			// Serial.println(jsonstring);
-
-			// Serial.println(Photo2Base64());
-			// char imgPayload[000] = "{\"fields\": { \"1610770215830\": {\"stringValue\": ";
-			// // String imgPayload = "{\"fields\": { \"1610770215830\": {\"stringValue\": " + Photo2Base64() + "}}}";
-			// strcat(imgPayload, Photo2Base64().c_str());
-			// strcat(imgPayload, "}}}");
-
-			// Serial.println(imgPayload);
-
-			// Serial.println(imgPayload);
-			// httpPATCHRequest(imgPayload, fullURL);
-			doc.clear();
+			// doc.clear();
 		}
 		else {
 			Serial.println("WiFi Disconnected");
 		}
-		
 	}
-	// json.add("photo", Photo2Base64());
-	// String photoPath = "/esp32-cam";
-	// if (Firebase.pushJSON(firebaseData, photoPath, json, 1.0)) {
-	// 	Serial.println(firebaseData.dataPath());
-	// 	Serial.println(firebaseData.pushName());
-	// 	Serial.println(firebaseData.dataPath() + "/"+ firebaseData.pushName());
-	// } else {
-	// 	Serial.println(firebaseData.errorReason());
-	// }
-	// delay(5000);
 }
 
-void packageJson(DynamicJsonDocument doc, const String& base64image){
-	Serial.println(base64image.c_str());
-	// doc["fields"]["1610770215830"]["stringValue"] = base64image.c_str();
-}
+// void packageJson(DynamicJsonDocument doc, const String& base64image){
+// 	Serial.println(strlen(base64image.c_str()));
+// 	// doc["fields"]["1610770215830"]["stringValue"] = base64image.c_str();
+// }
 
 //https://github.com/zenmanenergy/ESP8266-Arduino-Examples/
 String urlencode(String str) {
@@ -284,18 +295,20 @@ String urlencode(String str) {
 }
 
 String Photo2Base64() {
-	digitalWrite(4, HIGH);
+	// digitalWrite(4, HIGH);
 	camera_fb_t * fb = NULL;
 	// delay(500);
 	fb = esp_camera_fb_get();  
 	if(!fb) {
-		digitalWrite(4, LOW);
 		Serial.println("Camera capture failed");
+		// flash if camera cacat
+		digitalWrite(4, HIGH);
 		// ESP.restart();
 		return "";
 	}
 	digitalWrite(4, LOW);
 	String imageFile = "data:image/jpeg;base64,";
+	// String imageFile = "";
 	char *input = (char *)fb->buf;
 	char output[base64_enc_len(3)];
 	for (int i=0;i<fb->len;i++) {
@@ -370,82 +383,3 @@ int httpPATCHRequest(String json, char* url){
 
 	return httpResponseCode;
 }
-
-
-
-
-
-// void classifyImage() {
-//   String response;
-  
-//   // Capture picture
-//   camera_fb_t * fb = NULL;
-//   fb = esp_camera_fb_get();
-   
-//   if(!fb) {
-//     Serial.println("Camera capture failed");
-//     return;
-//   } else {
-//     Serial.println("Camera capture OK");
-//   }
-
-//   size_t size = fb->len;
-//   String buffer = base64::encode((uint8_t *) fb->buf, fb->len);
-  
-//   String imgPayload = "{\"fields\": { \"1610770215830\": {\"stringValue\": " + buffer + "\"}}}";
-
-//   buffer = "";
-//   // Uncomment this if you want to show the payload
-//   Serial.println(imgPayload);
-
-//   esp_camera_fb_return(fb);
-  
-//   // Generic model
-//   String model_id = "General";
-
-//   HTTPClient http;
-//   http.begin("https://api.clarifai.com/v2/models/" + model_id + "/outputs");
-//   http.addHeader("Content-Type", "application/json");     
-//   http.addHeader("Authorization", "c7f894790533332388e23d4d21278321"); 
-//   int httpResponseCode = http.POST(imgPayload);
-
-//   if(httpResponseCode>0){
-//     Serial.print(httpResponseCode);
-//     Serial.print(" Returned String: ");
-//     Serial.println(http.getString());
-//   } else {      
-//     Serial.print("POST Error: ");
-//     Serial.print(httpResponseCode);
-//   }                      
- 
-//   // Parse the json response: Arduino assistant
-//   const int jsonSize = JSON_ARRAY_SIZE(1) + JSON_ARRAY_SIZE(20) + 3*JSON_OBJECT_SIZE(1) + 6*JSON_OBJECT_SIZE(2) + JSON_OBJECT_SIZE(3) + 20*JSON_OBJECT_SIZE(4) + 2*JSON_OBJECT_SIZE(6);
-  
-//   StaticJsonDocument<jsonSize> doc;
-//   // Deserialize the JSON document
-//   DeserializationError error = deserializeJson(doc, response); 
-//   // Test if parsing succeeds.
-//   if (error) {
-//     Serial.print(F("deserializeJson() failed: "));
-//     Serial.println(error.f_str());
-//     return;
-//   }  
-
-//   Serial.println(jsonSize);
-//   Serial.println(response);
-
-//   for (int i=0; i < 10; i++) {
-// //    const name = doc["outputs"][0]["data"]["concepts"][i]["name"];
-// //    const float p = doc["outputs"][0]["data"]["concepts"][i]["value"];
-
-//     const char* name = doc["outputs"][0]["data"]["concepts"][i]["name"];
-//     const char* p = doc["outputs"][0]["data"]["concepts"][i]["value"];    
-    
-//     Serial.println("=====================");
-//     Serial.print("Name:");
-//     Serial.println(name[i]);
-//     Serial.print("Prob:");
-//     Serial.println(p);
-//     Serial.println();
-//   }
-// }
