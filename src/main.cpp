@@ -183,16 +183,20 @@ void setup() {
 		Serial.print("Camera Ready! Use 'http://");
 		Serial.print(WiFi.localIP());
 		Serial.println("' to connect");
-		WiFi.softAP((WiFi.localIP().toString()+"_"+(String)AP_SSID).c_str(), AP_PASS);            
+		WiFi.softAP((WiFi.localIP().toString()+"_"+(String)AP_SSID).c_str(), AP_PASS);      
+		
+		digitalWrite(4, HIGH);
+		delay(200);
+		digitalWrite(4, LOW);      
 	}
 	else {
 		Serial.println("--------------------  connection failed, restarting uwu -------------------- ");
 		digitalWrite(4, HIGH);
-		delay(450);
+		delay(200);
 		digitalWrite(4, LOW);
 		delay(100);
 		digitalWrite(4, HIGH);
-		delay(450);
+		delay(200);
 		digitalWrite(4, LOW);
 		ESP.restart();
 		// return;
@@ -214,8 +218,10 @@ void setup() {
 void loop() {
 
 	if ((millis() - prev_millis) > capture_interval) {
-    	//Check WiFi connection status
 		prev_millis = millis();
+
+		digitalWrite(4, LOW);
+    	//Check WiFi connection status
 		if (WiFi.status() == WL_CONNECTED) {
 			json.add("photo", Photo2Base64());
 			String photoPath = "/esp32-cam";
@@ -225,6 +231,8 @@ void loop() {
 				Serial.println(firebaseData.dataPath() + "/"+ firebaseData.pushName());
 			} else {
 				Serial.println(firebaseData.errorReason());
+
+				digitalWrite(4, HIGH);
 			}
 			// clear or else will crash
 			json.clear();
