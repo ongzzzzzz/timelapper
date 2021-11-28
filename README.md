@@ -1,5 +1,13 @@
 # timelapper
 
+# Example output video
+https://firebasestorage.googleapis.com/v0/b/esp8266-f2775.appspot.com/o/timelapper-2021-02-12.mp4?alt=media&token=cc18feb8-a3cd-4016-8a02-7c7a23290fde
+
+# Hardware
+the project uses an ESP32-CAM module to upload pictures to firebase
+![Hardware](https://raw.githubusercontent.com/Fogeinator/timelapper/main/data/timelapper.jpg)
+
+# How it works
 1. **ESP32-CAM** records images and saves to **Firebase RTDB**
 
 2. Every midnight, **Firebase Cloud Functions**:
