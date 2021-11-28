@@ -5,6 +5,7 @@ https://firebasestorage.googleapis.com/v0/b/esp8266-f2775.appspot.com/o/timelapp
 
 # Hardware
 the project uses an ESP32-CAM module to upload pictures to firebase
+
 ![Hardware](https://raw.githubusercontent.com/Fogeinator/timelapper/main/data/timelapper.jpg)
 
 # How it works
